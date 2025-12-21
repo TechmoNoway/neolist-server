@@ -2,23 +2,24 @@ package handlers
 
 import (
 	"encoding/json"
-	"neolist-backend/internal/service/user"
+	diSvc "neolist-backend/internal/di/services"
+	"neolist-backend/internal/dto"
 	"neolist-backend/internal/utils"
 	"net/http"
 )
 
 type UserHandler struct {
-	service user.UserService
+	service diSvc.IUserService
 }
 
-func NewUserHandler(service user.UserService) *UserHandler {
+func NewUserHandler(service diSvc.IUserService) *UserHandler {
 	return &UserHandler{
 		service: service,
 	}
 }
 
 func (h *UserHandler) RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	var req user.RegisterRequest
+	var req dto.RegisterRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "invalid json", http.StatusBadRequest)
@@ -37,7 +38,7 @@ func (h *UserHandler) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := user.RegisterResponse{
+	resp := dto.RegisterResponse{
 		ID:   user_service_res.ID,
 		Name: user_service_res.Name,
 	}
@@ -46,7 +47,7 @@ func (h *UserHandler) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) ListHandler(w http.ResponseWriter, r *http.Request) {
-	res, err := h.service.List(r.Context())
+	res, err := h.service.GetAll(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -69,7 +70,7 @@ func (h *UserHandler) FindByIDHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) UpdateHandler(w http.ResponseWriter, r *http.Request) {
-	var req user.UpdateRequest
+	var req dto.UpdateRequest
 
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {

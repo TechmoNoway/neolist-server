@@ -1,31 +1,24 @@
-package user
+package services
 
 import (
 	"context"
+	diRepo "neolist-backend/internal/di/repositories"
+	diSvc "neolist-backend/internal/di/services"
+	"neolist-backend/internal/dto"
 	"neolist-backend/internal/models"
-	"neolist-backend/internal/repositories"
 
 	"github.com/google/uuid"
 )
 
-type UserService interface {
-	Register(ctx context.Context, user RegisterRequest) (*RegisterResponse, error)
-	List(ctx context.Context) ([]*ListResponse, error)
-	FindByID(ctx context.Context, id string) (*FindByIdResponse, error)
-	Update(ctx context.Context, userData UpdateRequest) (string, error)
-	SoftDelete(ctx context.Context, id string) error
-	ForceDelete(ctx context.Context, id string) error
-}
-
 type userService struct {
-	userRepo repositories.UserRepository
+	userRepo diRepo.IUserRepository
 }
 
-func NewUserService(userRepo repositories.UserRepository) UserService {
+func NewUserService(userRepo diRepo.IUserRepository) diSvc.IUserService {
 	return &userService{userRepo: userRepo}
 }
 
-func (s *userService) Register(ctx context.Context, user RegisterRequest) (*RegisterResponse, error) {
+func (s *userService) Register(ctx context.Context, user dto.RegisterRequest) (*dto.RegisterResponse, error) {
 
 	newUser := &models.UserModel{
 		ID:   uuid.New().String(),
@@ -37,7 +30,7 @@ func (s *userService) Register(ctx context.Context, user RegisterRequest) (*Regi
 		return nil, err
 	}
 
-	res := &RegisterResponse{
+	res := &dto.RegisterResponse{
 		ID:        userRes.ID,
 		Name:      userRes.Name,
 		CreatedAt: userRes.CreatedAt,
@@ -47,17 +40,17 @@ func (s *userService) Register(ctx context.Context, user RegisterRequest) (*Regi
 	return res, nil
 }
 
-func (s *userService) List(ctx context.Context) ([]*ListResponse, error) {
+func (s *userService) GetAll(ctx context.Context) ([]*dto.GetAllResponse, error) {
 
-	users, err := s.userRepo.List(ctx)
+	users, err := s.userRepo.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	responses := make([]*ListResponse, len(users))
+	responses := make([]*dto.GetAllResponse, len(users))
 
 	for i, u := range users {
-		responses[i] = &ListResponse{
+		responses[i] = &dto.GetAllResponse{
 			ID:        u.ID,
 			Name:      u.Name,
 			Email:     u.Email,
@@ -69,13 +62,13 @@ func (s *userService) List(ctx context.Context) ([]*ListResponse, error) {
 	return responses, nil
 }
 
-func (s *userService) FindByID(ctx context.Context, id string) (*FindByIdResponse, error) {
+func (s *userService) FindByID(ctx context.Context, id string) (*dto.FindByIdResponse, error) {
 	user, err := s.userRepo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	response := &FindByIdResponse{
+	response := &dto.FindByIdResponse{
 		ID:        user.ID,
 		Name:      user.Name,
 		Email:     user.Email,
@@ -86,13 +79,13 @@ func (s *userService) FindByID(ctx context.Context, id string) (*FindByIdRespons
 	return response, nil
 }
 
-func (s *userService) Update(ctx context.Context, userData UpdateRequest) (string, error) {
+func (s *userService) Update(ctx context.Context, userData dto.UpdateRequest) (string, error) {
 
 	modelData := &models.UserModel{
 		ID:    userData.ID,
 		Name:  userData.Name,
-		Email: userData.Email,
-		Age:   userData.Age,
+		Email: &userData.Email,
+		Age:   &userData.Age,
 	}
 
 	result, err := s.userRepo.Update(ctx, modelData)

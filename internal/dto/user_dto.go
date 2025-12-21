@@ -1,4 +1,4 @@
-package user
+package dto
 
 import "time"
 
@@ -13,19 +13,19 @@ type RegisterResponse struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-type ListResponse struct {
+type GetAllResponse struct {
 	ID        string    `json:"id"`
 	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	Age       int64     `json:"age"`
+	Email     *string   `json:"email"`
+	Age       *int64    `json:"age"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
 type FindByIdResponse struct {
 	ID        string    `json:"id"`
 	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	Age       int64     `json:"age"`
+	Email     *string   `json:"email"`
+	Age       *int64    `json:"age"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
