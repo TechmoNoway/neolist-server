@@ -5,26 +5,20 @@ import (
 )
 
 type Router struct {
-	routes map[string]http.HandlerFunc
+	mux *http.ServeMux
 }
 
 func NewRouter() *Router {
 	return &Router{
-		routes: make(map[string]http.HandlerFunc),
+		mux: http.NewServeMux(),
 	}
 }
 
-func (r *Router) Handle(path string, handler http.HandlerFunc) {
-	r.routes[path] = handler
+func (r *Router) Handle(pattern string, handler http.HandlerFunc) {
+	r.mux.HandleFunc(pattern, handler)
 }
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	handler, ok := r.routes[req.URL.Path]
-
-	if ok {
-		handler(w, req)
-		return
-	}
-
-	http.NotFound(w, req)
+	r.mux.ServeHTTP(w, req)
 }
+

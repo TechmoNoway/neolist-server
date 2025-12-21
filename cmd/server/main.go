@@ -7,8 +7,8 @@ import (
 	"neolist-backend/internal/config"
 	"neolist-backend/internal/db"
 	"neolist-backend/internal/handlers"
-	"neolist-backend/internal/repositories/mysql"
-	"neolist-backend/internal/service/user"
+	"neolist-backend/internal/repositories"
+	"neolist-backend/internal/services"
 	"net/http"
 	"os"
 	"os/signal"
@@ -25,10 +25,16 @@ func main() {
 		json.NewEncoder(w).Encode("message: Server is running ok")
 	})
 
-	userRepo := mysql.NewUserRepository(newDB)
-	userService := user.NewUserService(userRepo)
+	// user routes
+	userRepo := repositories.NewUserRepository(newDB)
+	userService := services.NewUserService(userRepo)
 	userHandler := handlers.NewUserHandler(userService)
-	router.Handle("/user/create", userHandler.RegisterHandler)
+	router.Handle("POST /users/create", userHandler.RegisterHandler)
+	router.Handle("GET /users", userHandler.ListHandler)
+	router.Handle("GET /users/{id}", userHandler.FindByIDHandler)
+	router.Handle("PUT /users/update", userHandler.UpdateHandler)
+	router.Handle("PATCH /users/soft-delete/{id}", userHandler.SoftDeleteHandler)
+	router.Handle("DELETE /users/force-delete/{id}", userHandler.ForceDeleteHandler)
 
 	fmt.Printf("Server running on %v\n", cfg.Port)
 	go http.ListenAndServe(cfg.Port, router)

@@ -2,28 +2,24 @@ package handlers
 
 import (
 	"encoding/json"
-	"neolist-backend/internal/service/user"
+	diSvc "neolist-backend/internal/di/services"
+	"neolist-backend/internal/dto"
 	"neolist-backend/internal/utils"
 	"net/http"
 )
 
 type UserHandler struct {
-	service user.UserService
+	service diSvc.IUserService
 }
 
-func NewUserHandler(service user.UserService) *UserHandler {
+func NewUserHandler(service diSvc.IUserService) *UserHandler {
 	return &UserHandler{
 		service: service,
 	}
 }
 
 func (h *UserHandler) RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	var req user.RegisterRequest
+	var req dto.RegisterRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "invalid json", http.StatusBadRequest)
@@ -42,14 +38,91 @@ func (h *UserHandler) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := user.RegisterResponse{
+	resp := dto.RegisterResponse{
 		ID:   user_service_res.ID,
 		Name: user_service_res.Name,
 	}
 
 	utils.ResponseWriter(w, http.StatusCreated, resp)
+}
 
-	// w.Header().Set("Content-Type", "application/json")
-	// w.WriteHeader(http.StatusCreated)
-	// json.NewEncoder(w).Encode(resp)
+func (h *UserHandler) ListHandler(w http.ResponseWriter, r *http.Request) {
+	res, err := h.service.GetAll(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	utils.ResponseWriter(w, http.StatusOK, res)
+}
+
+func (h *UserHandler) FindByIDHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	println("id", id)
+
+	res, err := h.service.FindByID(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	utils.ResponseWriter(w, http.StatusOK, res)
+}
+
+func (h *UserHandler) UpdateHandler(w http.ResponseWriter, r *http.Request) {
+	var req dto.UpdateRequest
+
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if req.ID == "" {
+		http.Error(w, "ID is required", http.StatusBadRequest)
+		return
+	}
+
+	res, err := h.service.Update(r.Context(), req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	utils.ResponseWriter(w, http.StatusOK, res)
+
+}
+
+func (h *UserHandler) SoftDeleteHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	print("this is id again", id)
+	if id == "" {
+		http.Error(w, "ID is required", http.StatusBadRequest)
+		return
+	}
+
+	err := h.service.SoftDelete(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	utils.ResponseWriter(w, http.StatusOK, "User Deleted Successfully")
+
+}
+
+func (h *UserHandler) ForceDeleteHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	if id == "" {
+		http.Error(w, "ID is required", http.StatusBadRequest)
+		return
+	}
+
+	err := h.service.ForceDelete(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	utils.ResponseWriter(w, http.StatusOK, "User Deleted Successfully")
 }
