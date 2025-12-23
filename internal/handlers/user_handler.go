@@ -58,7 +58,6 @@ func (h *UserHandler) ListHandler(w http.ResponseWriter, r *http.Request) {
 
 func (h *UserHandler) FindByIDHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	println("id", id)
 
 	res, err := h.service.FindByID(r.Context(), id)
 	if err != nil {
@@ -95,7 +94,6 @@ func (h *UserHandler) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 
 func (h *UserHandler) SoftDeleteHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	print("this is id again", id)
 	if id == "" {
 		http.Error(w, "ID is required", http.StatusBadRequest)
 		return

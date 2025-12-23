@@ -57,7 +57,6 @@ func (r *userRepository) GetAll(ctx context.Context) ([]*models.UserModel, error
 }
 
 func (r *userRepository) FindByID(ctx context.Context, id string) (*models.UserModel, error) {
-	print(id)
 	query := `SELECT id, name, email, age, created_at, updated_at FROM users WHERE id = ?`
 
 	var u models.UserModel
@@ -75,7 +74,6 @@ func (r *userRepository) FindByID(ctx context.Context, id string) (*models.UserM
 }
 
 func (r *userRepository) Update(ctx context.Context, userData *models.UserModel) (string, error) {
-	print(userData.ID)
 	query := `UPDATE users SET name = ?, email = ?, age = ? WHERE id = ?`
 
 	result, err := r.db.ExecContext(ctx, query, userData.Name, userData.Email, userData.Age, userData.ID)
