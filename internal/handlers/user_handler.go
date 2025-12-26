@@ -69,7 +69,7 @@ func (h *UserHandler) FindByIDHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) UpdateHandler(w http.ResponseWriter, r *http.Request) {
-	var req dto.UpdateRequest
+	var req dto.UpdateUserRequest
 
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
