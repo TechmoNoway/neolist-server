@@ -31,7 +31,7 @@ func (r *taskRepository) Create(ctx context.Context, task *models.TaskModel) (st
 	return task.ID, nil
 }
 
-func (r *taskRepository) GetById(ctx context.Context, id string) (*models.TaskModel, error) {
+func (r *taskRepository) GetByID(ctx context.Context, id string) (*models.TaskModel, error) {
 	query := `
 		SELECT id
 			, user_id
@@ -174,9 +174,68 @@ func (r *taskRepository) Search(ctx context.Context, userID string, query string
 }
 
 func (r *taskRepository) MarkCompleted(ctx context.Context, id string, completed bool) error {
+	query := `
+		UPDATE tasks 
+		SET completed = ?
+		WHERE id = ?
+	`
+
+	result, err := r.db.ExecContext(ctx, query, completed, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (r *taskRepository) MarkCompletedMany(ctx context.Context, userID string, ids []string, completed bool) (string, error) {
-	return "", nil
+func (r *taskRepository) MarkCompletedMany(ctx context.Context, userID string, ids []string, completed bool) (int64, error) {
+
+	query := `
+		UPDATE tasks 
+		SET completed = ?
+		WHERE id = ?
+	`
+
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	defer tx.Rollback()
+
+	stmt, err := tx.PrepareContext(ctx, query)
+	if err != nil {
+		return 0, err
+	}
+
+	defer stmt.Close()
+
+	var totalRowsAffected int64
+
+	for _, id := range ids {
+		res, err := stmt.ExecContext(ctx, completed, id)
+		if err != nil {
+			return 0, err
+		}
+
+		rows, err := res.RowsAffected()
+		if err != nil {
+			return 0, err
+		}
+
+		totalRowsAffected += rows
+
+	}
+
+	return totalRowsAffected, tx.Commit()
 }

@@ -13,7 +13,7 @@ type RegisterResponse struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-type GetAllResponse struct {
+type GetAllUsersResponse struct {
 	ID        string    `json:"id"`
 	Name      string    `json:"name"`
 	Email     *string   `json:"email"`
@@ -21,7 +21,7 @@ type GetAllResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-type FindByIdResponse struct {
+type FindUserByIdResponse struct {
 	ID        string    `json:"id"`
 	Name      string    `json:"name"`
 	Email     *string   `json:"email"`
@@ -29,18 +29,18 @@ type FindByIdResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-type UpdateRequest struct {
+type UpdateUserRequest struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
 	Email string `json:"email"`
 	Age   int64  `json:"age"`
 }
 
-type UpdateResponse struct {
+type UpdateUserResponse struct {
 }
 
-type SoftDeleteResponse struct {
+type SoftDeleteUserResponse struct {
 }
 
-type ForceDeleteResponse struct {
+type ForceDeleteUserResponse struct {
 }

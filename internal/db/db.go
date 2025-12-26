@@ -50,3 +50,7 @@ func (d *Database) QueryContext(ctx context.Context, query string, args ...any) 
 func (d *Database) QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row {
 	return d.db.QueryRowContext(ctx, query, args...)
 }
+
+func (d *Database) BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error) {
+	return d.db.BeginTx(ctx, opts)
+}

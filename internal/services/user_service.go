@@ -40,17 +40,17 @@ func (s *userService) Register(ctx context.Context, user dto.RegisterRequest) (*
 	return res, nil
 }
 
-func (s *userService) GetAll(ctx context.Context) ([]*dto.GetAllResponse, error) {
+func (s *userService) GetAll(ctx context.Context) ([]*dto.GetAllUsersResponse, error) {
 
 	users, err := s.userRepo.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	responses := make([]*dto.GetAllResponse, len(users))
+	responses := make([]*dto.GetAllUsersResponse, len(users))
 
 	for i, u := range users {
-		responses[i] = &dto.GetAllResponse{
+		responses[i] = &dto.GetAllUsersResponse{
 			ID:        u.ID,
 			Name:      u.Name,
 			Email:     u.Email,
@@ -62,13 +62,13 @@ func (s *userService) GetAll(ctx context.Context) ([]*dto.GetAllResponse, error)
 	return responses, nil
 }
 
-func (s *userService) FindByID(ctx context.Context, id string) (*dto.FindByIdResponse, error) {
+func (s *userService) FindByID(ctx context.Context, id string) (*dto.FindUserByIdResponse, error) {
 	user, err := s.userRepo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	response := &dto.FindByIdResponse{
+	response := &dto.FindUserByIdResponse{
 		ID:        user.ID,
 		Name:      user.Name,
 		Email:     user.Email,
@@ -79,7 +79,7 @@ func (s *userService) FindByID(ctx context.Context, id string) (*dto.FindByIdRes
 	return response, nil
 }
 
-func (s *userService) Update(ctx context.Context, userData dto.UpdateRequest) (string, error) {
+func (s *userService) Update(ctx context.Context, userData dto.UpdateUserRequest) (string, error) {
 
 	modelData := &models.UserModel{
 		ID:    userData.ID,
